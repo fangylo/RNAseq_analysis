@@ -1,0 +1,124 @@
+-----------------
+  mergeFpkm.py
+-----------------
+usage: mergeFpkm.py [-h] [-f FILEPATTERN] [-p FIRSTLEVELFOLDERPATTERN]
+                    [-r [ROOTFOLDERPATHS [ROOTFOLDERPATHS ...]]] [-k COLASKEY]
+                    [-v COLASVALUE] [--withoutstatusfilter] [-d REMOVEKEYEQTO]
+                    [-m MERGEDUPBY] [-o OUTFILEPATH]
+
+Merge selected files in the PID_FUID directory. Optionally output csv
+file. After rna-seq pipeline, fpkm files are ususally stored under each
+sample ID directory (US-*) under the PID_FUID project directory. Also
+there are often duplicated gene names. This script look through all the
+sample directories in the project directory, find the file that matches
+the supplied pattern (filepattern, default set to genes_fpkm.tracking,
+which is the gene fpkm), then first read the fpkm files to
+pd.dataframes. The data is the filtered by status (default only select
+rows where FPKM_status=OK), then merge duplicated row values by mean,
+median or max (default set to mean).The resulting dataframe has
+different samples as columns and different genes (unique) as rows.
+Note that no log transformation is performed here.
+
+Example:
+cd <Project directory>
+python mergeFpkm.py
+       -f "gene.fpkm_tracking"
+       -r .
+       -k "gene_short_name"
+       -m mean
+       -u ","
+       -o out_test.csv'
+
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FILEPATTERN, --filepattern FILEPATTERN
+                        Input file pattern.
+                        E.g. "genes.fpkm_tracking"
+  -p FIRSTLEVELFOLDERPATTERN, --firstLevelFolderPattern FIRSTLEVELFOLDERPATTERN
+                        First level folder pattern, i.e. the sample
+                        id folders.
+  -r [ROOTFOLDERPATHS [ROOTFOLDERPATHS ...]], --rootfolderPaths [ROOTFOLDERPATHS [ROOTFOLDERPATHS ...]]
+                        One or more root folder paths that first level
+                        folder pattern will be searched in.
+  -k COLASKEY, --colaskey COLASKEY
+                        column in the file used as key (rownames)
+  -v COLASVALUE, --colasvalue COLASVALUE
+                        column in the file used as values
+  --withoutstatusfilter
+                        Supply this argument if do not filter FPKM
+                        to only rows where the status column is OK.
+  -d REMOVEKEYEQTO, --removeKeyEqTo REMOVEKEYEQTO
+                        Remove keys (gene names) shown as -.
+  -m MERGEDUPBY, --mergeDupBy MERGEDUPBY
+                        Merge duplicated (genes) by mean, median or max.
+  -o OUTFILEPATH, --outfilePath OUTFILEPATH
+                        Output the result df to a (csv) file.
+                        Default is None. No file is output.
+
+Example:
+$cd <PID_FUID directory>
+$unset PYTHONPATH
+$python mergeFpkm.py -r '.' -o "test.csv"
+
+------------------------------
+ mergeDupDfBySelectedCol.py
+------------------------------
+Process a gene expression table file and merge duplicated genes by taking the mean.
+
+usage: mergeDupDfBySelectedCol.py [-h] [-o OUTFILEPATH] [-d DELIMITER]
+                                  [-k COLASKEY]
+                                  [-m [COLSTOBEOMITTED [COLSTOBEOMITTED ...]]]
+                                  filepath
+
+Process a gene expression csv file: merge duplicated
+genes. Optionally output merged results to a csv table.Example:
+   python mergeDupDfBySelectedCol.py
+          "expression.csv"
+          -o expression_merged.csv
+          -d ","
+          -k GeneSymbol
+          -m GeneSymbol ID Description
+
+positional arguments:
+  filepath              Input file path.
+                        E.g. "/home/lof/Agilent_201602/data/expression1.csv"
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTFILEPATH, --outfilePath OUTFILEPATH
+                        Output file path.
+                        E.g. "/home/lof/Agilent_201602/data/expression_merged.csv"
+  -d DELIMITER, --delimiter DELIMITER
+                        Delimiter.
+  -k COLASKEY, --colAsKey COLASKEY
+                        Delimiter.
+  -m [COLSTOBEOMITTED [COLSTOBEOMITTED ...]], --colsToBeOmitted [COLSTOBEOMITTED [COLSTOBEOMITTED ...]]
+                        Names of columns to be omitted.
+
+
+-----------------
+ fpkm_compare.py
+-----------------
+usage: fpkm_compare.py [-h] [-p PROJECTDIR] [-s SAMPLEIDS SAMPLEIDS]
+                       [-f FPKMFILENAME] [-m CORRMETHOD]
+
+Get correlation coefficients between two gene expression results (fpkm).Note: use
+Example:
+python fpkm_compare.py -p <projectfolderdir>
+                       -s <sampleid1> <sampleid2>
+                       -f <gene.fpkm> <gene.fpkm>
+                       -m <correlation method>
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PROJECTDIR, --projectdir PROJECTDIR
+                        Project root dirpath.
+  -s SAMPLEIDS SAMPLEIDS, --sampleIds SAMPLEIDS SAMPLEIDS
+                        The two sample ids of which correlation to be calculated.
+                        This should be the same name as the sample folders.
+                        Eg. RS-758933 RS-758934
+  -f FPKMFILENAME, --fpkmfilename FPKMFILENAME
+                        Name of files under each sample dir.
+  -m CORRMETHOD, --corrMethod CORRMETHOD
+                        Method used for correlation.

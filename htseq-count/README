@@ -1,0 +1,125 @@
+####################################################################
+##  This is a mini-pipeline for running Htseq-count for all the   ##
+##  RNA-seq samples in a given PID-FUID directory.                ##
+##  It consists of 3 steps:                                       ##
+##    1. Run HTseq-count                                          ##
+##    2. Check HTseq-count results                                ##
+##    3. Join HTSeq-count results from each sample to a           ##
+##       single text file for downstrean processing, e.g.edgeR.   ##
+##   (Fang Yin Lo, Jan 2016)                                      ##
+####################################################################
+
+#####################################
+##        Run Htseq-count          ##
+#####################################
+runHTSeq_count_all.sh
+----------------------
+Go to sample FUID directory:
+e.g.
+/SequenceData/In_Process/HiSeq/rnaseq_processing/1112_Lilly/Project_16038_FUID1026031
+
+Example of running the script:
+/home/lof/code/RNAseq_analysis/htseq-count/runHTSeq_count_all.sh \
+--refGtf /toolbox/NGS/genomes/hg19/annotations/refGene.gtf \
+--pid_fuid Project_16038_FUID1026031 \
+--regex_pattern_for_samplenames \./[US/-]{3}[0-9]{7} \
+--stranded yes \
+--subdir tophat
+
+or:
+/home/lof/code/RNAseq_analysis/htseq-count/runHTSeq_count_all.sh \
+--refGtf /toolbox/NGS/genomes/hg19/annotations/refGene.gtf \
+--pid_fuid Project_16038_FUID1026031 \
+--regex_pattern_for_samplenames \./[US/-]{3}[0-9]{7} \
+--stranded yes \
+--subdir tophat \
+--alignedbamformat accepted_hits.bam
+
+For help:
+runHTSeq_count_all.sh --help
+
+*************** You should check first if ************************
+find -regextype posix-egrep -maxdepth 1 -mindepth 1 -type d -regex $regex_pattern_for_samplenames
+finds all the samples in this directory
+******************************************************************
+Description:
+
+The script reads in three required arguments:
+--refGtf: GTF file used for running htseq
+--pid_fuid: directory name that specifies PID and FUID
+--regex_pattern_for_samplenames: regex pattern of US barcodes of samples. This
+                                 finds all the sample directories under the
+                                 current project fuid folder.
+--stranded : the input argument for htseq. whether the RNA-seq data is
+             stranded or not.
+--subdir <Default is "". Supply subdir name if there is any between samples and PID dir>
+         e.g. if sample is under: */Project_16038_FUID1026031/tophat/ instead of
+              */Project_16038_FUID1026031/, then tophat should be supplied here.
+--altalignedbamformat <default is "">. Supply if the aligned bam file format is not
+                                               [US barcode].bam. e.g. tophat output is accepted_hits.bam
+
+This script will first generate the appropriate folder structure for running
+htseq-count, then use runHTSeq_count_template.sh as a template. For each sample,
+the appropriate htseq-count script is generated based on the provided template.
+HTSeq-count is run through all the samples that match the provided regex
+pattern. Result count files and log files are saved at htseq-count/ directory.
+
+###########################################
+##   Check HTseq-count mapping results   ##
+###########################################
+getHTSeqcountUniqAlignedPercentage.py
+-------------------------------------
+Get the percentage of uniquely aligned reads by HTSeq-count.
+
+usage: getHTSeqcountUniqAlignedPercentage.py [-h] analysisdir
+
+Get the percentage of uniquely aligned reads by HTSeq-count:
+Example:
+  python getHTSeqcountUniqAlignedPercentage.py
+         /SequenceData/In_Process/HiSeq/rnaseq_processing/1120_Daiichi/Project_15022/secondary_analysis/htseq-count
+
+positional arguments:
+  analysisdir  htseq-count analysis directory path (without trailing "/").
+
+optional arguments:
+  -h, --help   show this help message and exit
+
+
+Example of running the script:
+python getHTSeqcountUniqAlignedPercentage.py <path/to/htseq-count directory>
+
+Description:
+This script will go through all log files and result files for the samples run
+through HTseq-count and calculate the percentage of reads mapped to features
+specified in the previously given gtf file.
+
+#####################################
+##    Join Htseq-count results     ##
+#####################################
+joinCounts.py
+----------------
+Go to the count directory under sample FUID directory:
+/SequenceData/In_Process/HiSeq/rnaseq_processing/UW/Project_15903_FUID1025093-3/htseq-count/counts
+
+
+usage: joinCounts.py [-h]
+                     out_filename [listOfCountFiles [listOfCountFiles ...]]
+
+Join HTseq count results.
+Example:
+   python joinCounts.py
+          "htseqcount_all.txt" htseq.count.out_*
+
+positional arguments:
+  out_filename      Output file name.
+                    E.g. "htseqcount_all.txt"
+  listOfCountFiles  File pattern for input count files.
+                    E.g. htseq.count.out_*
+
+optional arguments:
+  -h, --help        show this help message and exit
+
+
+Run the following python script:
+python joinCounts.py "htseqcount_all.txt" htseq.count.out_*
+The resulting joined count file is output as htseq.count.out_*

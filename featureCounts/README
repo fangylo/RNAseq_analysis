@@ -1,0 +1,56 @@
+----------------------------
+  runFeatureCounts_all.sh
+----------------------------
+Usage :
+  1. Go to the project directory.
+  2. Run script as follows:
+    runFeatureCounts_all.sh --refGtf <location for reference the GTF file> (e.g. /genome/refGtf)
+                            --pid_fuid <PID,FUID> (e.g.Project_15903_FUID1025093-3)
+                            --regex_pattern_for_samplenames <pattern> (e.g.\./[US/-]{3}[0-9]{7})
+                            --subdir <Default is "". Supply subdir name if there is any between samples and PID dir>
+                                      e.g. if sample is under: */Project_16038_FUID1026031/tophat/ instead of
+                                           */Project_16038_FUID1026031/, then tophat should be supplied here.
+                            --altalignedbamformat <default is "">. Supply if the aligned bam file format is not
+                                                [US barcode].bam. e.g. tophat output is accepted_hits.bam
+                            --isStrandSpecific:Indicate if strand-specific read counting should be performed.
+                                               It has three possible values: 0 (unstranded), 1 (stranded) and
+                                               2 (reversely stranded). 0 by default.
+                            --threadcount: Number of the threads. The value should be between 1 and 32. Default 1
+                            --isPairedEnd: yes or no. Default is yes.
+    Note:
+      All samples to be processed should be found using the above pattern by:
+      find -regextype posix-egrep -maxdepth 1 -mindepth 1 -type d -regex $regex_pattern_for_samplenames
+
+    Run example:
+    cd /SequenceData/In_Process/HiSeq/rnaseq_processing/1112_Lilly/Project_16411_FUID1029081/tophat
+    runFeatureCounts_all.sh \
+      --refGtf /toolbox/NGS/genomes/rn5/annotations/refGene.gtf \
+      --pid_fuid Project_16411_FUID1029081 \
+      --regex_pattern_for_samplenames \./[US/-]{3}[0-9]{7} \
+      --isStrandSpecific 2 \
+      --threadcount 10 \
+      --isPairedEnd yes \
+      --subdir tophat \
+      --altalignedbamformat accepted_hits.bam
+
+----------------------------
+       joinCounts.py
+----------------------------
+usage: joinCounts.py [-h]
+                     out_filename [listOfCountFiles [listOfCountFiles ...]]
+
+Join featurecounts results.
+Example:
+   cd <featurecount counts directory>
+   python joinCounts.py
+          "featurecount_all.txt" *_featureCounts.txt
+
+positional arguments:
+  out_filename      Output file name.
+                    E.g. "featurecount_all.txt"
+  listOfCountFiles  File pattern for input count files.
+                    E.g. *_featureCounts.txt
+
+optional arguments:
+  -h, --help        show this help message and exit
+

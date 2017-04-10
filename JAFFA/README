@@ -1,0 +1,23 @@
+---------------------------
+    runjaffa_all.sh
+---------------------------
+Usage :
+1. Go to the project directory.
+2. Run script as follows:
+   runjaffa_all.sh --regex_pattern_for_samplenames <pattern> (e.g.\./[US/-]{3}[0-9]{7})
+                   --projectdirroot <e.g./SequenceData/In_Process/HiSeq/rnaseq_processing/INTERNAL_DEV/Project_15425_FUID1022672>
+                   --fastqdirroot <e.g./SequenceData/Data_Analysis/Project_15425_FUID1022672>
+   Note: all samples to be processed should be found using the above pattern by:
+         find -regextype posix-egrep -maxdepth 1 -mindepth 1 -type d -regex $regex_pattern_for_samplenames
+
+This will modify runjaffa_template.sh for each sample and send the jaffa runs to cluster
+
+---------------------------------
+    runjaffa_singlesample.sh
+---------------------------------
+Usage :
+1. Go to the project directory.
+2. Run script as follows:
+   runjaffa_singlesample.sh --samplebarcode <pattern> (e.g.US-1493187)
+                            --projectdirroot <e.g./SequenceData/In_Process/HiSeq/rnaseq_processing/INTERNAL_DEV/Project_15425_FUID1022672>
+                            --fastqdirroot <e.g./SequenceData/Data_Analysis/Project_15425_FUID1022672>
